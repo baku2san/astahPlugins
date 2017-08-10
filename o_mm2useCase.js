@@ -53,16 +53,17 @@ function run() {
  
             print(presentations);
             var iUseCase = null;
+            var pointX = 10.0;
             for ( var sIndex in selectedEntities){
                 var sItem = selectedEntities[sIndex];
                 print(sItem + " in " +  presentations.length + " @ " + iuseCaseDiagram);
                 // MindMapからUseCaseを追加：モデルの追加
                 if (hasItem(existingUseCases, sItem)){
-                    print("already existed as " + sItem);
+                    print("already existed : " + sItem);
                     iUseCase = getItem(existingUseCases, sItem);
                     // do nothing cause of existing as UseCase
                 }else {
-                    print("add");
+                    //print("add");
                     editor.setDiagram(iuseCaseDiagram);
                     iUseCase = mEditor.createUseCase(project, sItem);
                 }
@@ -70,9 +71,8 @@ function run() {
                 if (hasPresentation(presentations, sItem)){
                     print("already existed as presentation : " + sItem);
                 }else {
-                    print("??");
-                    var uItem = editor.createNodePresentation(iUseCase, new Point2D.Double(10.0, 10.0));
-                    print(uItem);
+                    var uItem = editor.createNodePresentation(iUseCase, new Point2D.Double(pointX, 10.0));
+                    pointX += 120.0;
                 }
             }
             TransactionManager.endTransaction();
@@ -120,7 +120,7 @@ function getIndent(depth) {
 }
 function getItem(array, name){
     for (var index in array)  {
-        if (array[index] == name){
+        if (array[index].getName() == name){
             return array[index];
         }
     }
@@ -131,17 +131,15 @@ function hasPresentation(array, name){
     for (var index in array)  {
         //print(String(array[index]) + " vs " + name);
         if (array[index] == name) {
-            print("found");
             return true;
         }
     }
-    print("not found");
     return false;
 }
 function hasItem(array, name){
-    print(typeof(array) + " / " + array.length + " : " + name);
+    //print(typeof(array) + " / " + array.length + " : " + name);
     for (var index in array)  {
-        print(String(array[index]) + " vs " + name);
+        //print(String(array[index]) + " vs " + name);
         if (array[index].getName() == new String(name)) {
             return true;
         }
