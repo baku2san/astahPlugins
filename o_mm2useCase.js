@@ -48,7 +48,7 @@ function run() {
         var existingUseCases2 = projectAccessor.findElements(IUseCase.class);
         var existingUseCases = new Array();
         for ( var index in existingUseCases2){
-            existingUseCases.push(existingUseCases2[index]);
+            existingUseCases.push(new String(existingUseCases2[index]));
         }
         var selectedEntities = diagramViewManager.getSelectedPresentations();
         var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
@@ -58,32 +58,32 @@ function run() {
         with(new JavaImporter(
                 com.change_vision.jude.api.inf.editor)) {
             TransactionManager.beginTransaction();
-            createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
+            createUseCase(project, projectAccessor, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
             TransactionManager.endTransaction();
         }
     }
 }
-function createUseCase(project, mmItem, selections, existingUseCases, existingPresentations, diagEditor, modelEditor, point){
+function createUseCase(project, projectAccessor, mmItem, selections, existingUseCases, existingPresentations, diagEditor, modelEditor, point){
     var mmChildren = mmItem.getChildren();
     var currentPoint = new java.awt.geom.Point2D.Double(point.getX() + 150.0, existingPresentations[0].getHeight());
 //    print(mmChildren + " : " + mmChildren.length);
     for(var mmIndex in mmChildren){
         var mmChild = mmChildren[mmIndex];
-        createUseCase(project, mmChild, selections, existingUseCases, existingPresentations, diagEditor,  modelEditor, currentPoint);
+        createUseCase(project, projectAccessor, mmChild, selections, existingUseCases, existingPresentations, diagEditor,  modelEditor, currentPoint);
         // 選択中のMindMap要素のみに処理
-        var str = new String(mmChild);
-        if (str.match(/\r?\n/) == null){
+        var strMmChild = new String(mmChild);
+        if (strMmChild.match(/\r?\n/) == null){
             if (hasPresentation(selections, mmChild)){
                 print("selected " + mmChild );
                 
                 // mindmap に対応したUsecaseModelを取得or 生成
                 var ucChild = null;
-                if (hasItem(existingUseCases, mmChild)){
-                    ucChild = getItem(existingUseCases, mmChild);
+                if (hasItem(existingUseCases, strMmChild)){
+                    ucChild = projectAccessor.findElements(com.change_vision.jude.api.inf.model.IUseCase.class, mmChild);
                 }else {
                     print("hage");
                     ucChild = modelEditor.createUseCase(project, mmChild);
-                    existingUseCases.push(mmChild);
+                    existingUseCases.push(strMmChild);
                 }
                 
                     // ユースケース図上に表示追加:  抑制する場合にはこれが必要
@@ -98,7 +98,7 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
                 //print("not selected " + mmChild );
             }
         }else{
-            print(str + " is not executed cause of return code existed.");
+            print(strMmChild + " is not executed cause of return code existed.");
         }
                 currentPoint.setLocation(currentPoint.getX(), existingPresentations[0].getHeight());
           
@@ -164,7 +164,8 @@ function hasPresentation(array, name){
 
 function hasItem(array, name){
     for (var index in array)  {
-        if (array[index].getName() ==  name) {
+        print(array[index] + array[index].length + " vs " + name + name.length);
+        if (array[index].indexOf(name) != -1) {
             return true;
         }
     }
