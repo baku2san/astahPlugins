@@ -19,6 +19,9 @@ function run() {
 
         var diagramViewManager = astah.getViewManager().getDiagramViewManager();
         var currentDiagram = diagramViewManager.getCurrentDiagram();
+        var selectedEntities = diagramViewManager.getSelectedPresentations();
+        var firstestMM = getFirstSelectedName(selectedEntities);
+
         // MindMap でのみ動作
         if (!(currentDiagram instanceof IMindMapDiagram)){
             print ("open mindmap and run again.");
@@ -26,7 +29,12 @@ function run() {
         }
         var mmRoot = currentDiagram.getRoot();
         var mmChildren = mmRoot.getChildren();
-        var newDiagramName= currentDiagram.getName();
+        var newDiagramName = "";
+        if ( isMMDiagramName){
+            newDiagramName= currentDiagram.getName();
+        }else{
+            newDiagramName= firstestMM.getLabel();
+        }
 
         TransactionManager.beginTransaction();
             
@@ -48,7 +56,6 @@ function run() {
         for ( var index in existingUseCases2){
             existingUseCases.push(existingUseCases2[index]);
         }
-        var selectedEntities = diagramViewManager.getSelectedPresentations();
         var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
         var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
         var existingPresentations = iuseCaseDiagram.getPresentations();
