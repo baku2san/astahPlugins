@@ -83,19 +83,12 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
                 if (hasItem(existingUseCases, mmChild)){
                     ucChild = getItem(existingUseCases, mmChild);
                 }else {
-                    print("hage");
                     ucChild = modelEditor.createUseCase(project, mmChild);
                     existingUseCases.push(mmChild);
                 }
-                
                     // ユースケース図上に表示追加:  抑制する場合にはこれが必要
                     //            if (hasPresentation(existingPresentations, mmChild)){
-                    print("hoge");
-
                 var uItem = diagEditor.createNodePresentation(ucChild, currentPoint);
-                                    print("hige");
-
-              
             }else{
                 //print("not selected " + mmChild );
             }
