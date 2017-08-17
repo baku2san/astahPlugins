@@ -14,7 +14,8 @@ run();
 function run() {
     with(new JavaImporter(
             com.change_vision.jude.api.inf.model,
-            com.change_vision.jude.api.inf.project)) {
+            com.change_vision.jude.api.inf.project,
+            com.change_vision.jude.api.inf.editor)) {
 
         var diagramViewManager = astah.getViewManager().getDiagramViewManager();
         var currentDiagram = diagramViewManager.getCurrentDiagram();
@@ -31,36 +32,31 @@ function run() {
         var projectAccessor = ProjectAccessorFactory.getProjectAccessor();
         var foundUseCaseDiagram = projectAccessor.findElements(IUseCaseDiagram.class, newDiagramName);
         var iuseCaseDiagram = null;
-        if ( foundUseCaseDiagram.length == 0) {
-            // create new 
-            with(new JavaImporter(
-                    com.change_vision.jude.api.inf.editor)) {
-                TransactionManager.beginTransaction();
-                var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
-                iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
-                TransactionManager.endTransaction();
-            }
-        }else{
-            // use existing UseCaseDiagram
-            iuseCaseDiagram =foundUseCaseDiagram[0];
-        }
-        var project = astah.getProject();
-        var existingUseCases2 = projectAccessor.findElements(IUseCase.class);
-        var existingUseCases = new Array();
-        for ( var index in existingUseCases2){
-            existingUseCases.push(existingUseCases2[index]);
-        }
-        var selectedEntities = diagramViewManager.getSelectedPresentations();
-        var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
-        var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
-        var existingPresentations = iuseCaseDiagram.getPresentations();
-        var initialPoint2D = new java.awt.geom.Point2D.Double(10.0, existingPresentations[0].getHeight());
-        with(new JavaImporter(
-                com.change_vision.jude.api.inf.editor)) {
+
             TransactionManager.beginTransaction();
-            createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
+            
+            if ( foundUseCaseDiagram.length == 0) {
+                // create new 
+                    var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
+                    iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
+            }else{
+                // use existing UseCaseDiagram
+                iuseCaseDiagram =foundUseCaseDiagram[0];
+            }
+            var project = astah.getProject();
+            var existingUseCases2 = projectAccessor.findElements(IUseCase.class);
+            var existingUseCases = new Array();
+            for ( var index in existingUseCases2){
+                existingUseCases.push(existingUseCases2[index]);
+            }
+            var selectedEntities = diagramViewManager.getSelectedPresentations();
+            var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
+            var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
+            var existingPresentations = iuseCaseDiagram.getPresentations();
+            var initialPoint2D = new java.awt.geom.Point2D.Double(10.0, existingPresentations[0].getHeight());
+           createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
+
             TransactionManager.endTransaction();
-        }
     }
 }
 function createUseCase(project, mmItem, selections, existingUseCases, existingPresentations, diagEditor, modelEditor, point){
@@ -145,7 +141,8 @@ function getIndent(depth) {
 }
 function getItem(array, name){
     for (var index in array)  {
-        if (array[index].getName() == name){
+        if (String(array[index]) ==  name) {
+//        if (array[index].getName() == name){
             return array[index];
         }
     }
@@ -164,7 +161,8 @@ function hasPresentation(array, name){
 
 function hasItem(array, name){
     for (var index in array)  {
-        if (array[index].getName() ==  name) {
+        if (String(array[index]) ==  name) {
+//        if (array[index].getName() ==  name) {
             return true;
         }
     }
