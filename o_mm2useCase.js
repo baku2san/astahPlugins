@@ -11,6 +11,7 @@ var ITEM_MARKER_STR = '* ';
 
 run();
 
+exit;
 function run() {
     with(new JavaImporter(
             com.change_vision.jude.api.inf.model,
@@ -33,7 +34,9 @@ function run() {
         if ( isMMDiagramName){
             newDiagramName= currentDiagram.getName();
         }else{
-            newDiagramName= firstestMM.getLabel();
+            if (firstestMM != null){
+                newDiagramName= firstestMM.getLabel();
+            }
         }
 
         TransactionManager.beginTransaction();
