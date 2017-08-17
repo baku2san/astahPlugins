@@ -44,8 +44,8 @@ function run() {
         var iuseCaseDiagram = null;
         if ( foundUseCaseDiagram.length == 0) {
             // create new 
-                var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
-                iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
+            var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
+            iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
         }else{
             // use existing UseCaseDiagram
             iuseCaseDiagram =foundUseCaseDiagram[0];
@@ -59,6 +59,7 @@ function run() {
         var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
         var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
         var existingPresentations = iuseCaseDiagram.getPresentations();
+        // 現状point Y を制御諦めてるが・・Initial分離して渡して加算制御かな
         var initialPoint2D = new java.awt.geom.Point2D.Double(10.0, existingPresentations[0].getHeight());
        createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
 
@@ -95,17 +96,18 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
         }else{
             print(str + " is not executed cause of return code existed.");
         }
-                currentPoint.setLocation(currentPoint.getX(), existingPresentations[0].getHeight());
-          
+        currentPoint.setLocation(currentPoint.getX(), existingPresentations[0].getHeight());
     }
 }
 function getFirstSelectedName(selections){
     var currentSize = 0;
     var biggestFontObj = null;
     for(var sIndex in selections){
-        if (currentSize < selections[sIndex].getProperty("font.size")){
-            biggestFontObj = selections[sIndex];
-            currentSize = selections[sIndex].getProperty("font.size");
+        if (selections[sIndex].getType() == 'Topic') { //skip MMBoundary        
+            if (currentSize < selections[sIndex].getProperty("font.size")){
+                biggestFontObj = selections[sIndex];
+                currentSize = selections[sIndex].getProperty("font.size");
+            }
         }
     }
     return biggestFontObj;
@@ -162,8 +164,10 @@ function hasPresentation(array, name){
     //print(typeof(array) + " * " + array.length + " : " + name);
     for (var index in array)  {
         //print(String(array[index]) + " vs " + name);
-        if (array[index] == name) {
-            return true;
+        if (array[index].getType() == 'Topic') { //skip MMBoundary     
+            if (array[index] == name) {
+                return true;
+            }
         }
     }
     return false;
