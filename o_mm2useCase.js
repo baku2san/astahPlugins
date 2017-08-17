@@ -28,35 +28,34 @@ function run() {
         var mmChildren = mmRoot.getChildren();
         var newDiagramName= currentDiagram.getName();
 
+        TransactionManager.beginTransaction();
+            
         // MinｄMapと同一名のUseCase図取得
         var projectAccessor = ProjectAccessorFactory.getProjectAccessor();
         var foundUseCaseDiagram = projectAccessor.findElements(IUseCaseDiagram.class, newDiagramName);
         var iuseCaseDiagram = null;
+        if ( foundUseCaseDiagram.length == 0) {
+            // create new 
+                var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
+                iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
+        }else{
+            // use existing UseCaseDiagram
+            iuseCaseDiagram =foundUseCaseDiagram[0];
+        }
+        var project = astah.getProject();
+        var existingUseCases2 = projectAccessor.findElements(IUseCase.class);
+        var existingUseCases = new Array();
+        for ( var index in existingUseCases2){
+            existingUseCases.push(existingUseCases2[index]);
+        }
+        var selectedEntities = diagramViewManager.getSelectedPresentations();
+        var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
+        var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
+        var existingPresentations = iuseCaseDiagram.getPresentations();
+        var initialPoint2D = new java.awt.geom.Point2D.Double(10.0, existingPresentations[0].getHeight());
+       createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
 
-            TransactionManager.beginTransaction();
-            
-            if ( foundUseCaseDiagram.length == 0) {
-                // create new 
-                    var editor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
-                    iuseCaseDiagram = editor.createUseCaseDiagram(astah.getProject(), newDiagramName);
-            }else{
-                // use existing UseCaseDiagram
-                iuseCaseDiagram =foundUseCaseDiagram[0];
-            }
-            var project = astah.getProject();
-            var existingUseCases2 = projectAccessor.findElements(IUseCase.class);
-            var existingUseCases = new Array();
-            for ( var index in existingUseCases2){
-                existingUseCases.push(existingUseCases2[index]);
-            }
-            var selectedEntities = diagramViewManager.getSelectedPresentations();
-            var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
-            var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
-            var existingPresentations = iuseCaseDiagram.getPresentations();
-            var initialPoint2D = new java.awt.geom.Point2D.Double(10.0, existingPresentations[0].getHeight());
-           createUseCase(project, mmRoot, selectedEntities, existingUseCases, existingPresentations, dEditor, mEditor, initialPoint2D);
-
-            TransactionManager.endTransaction();
+        TransactionManager.endTransaction();
     }
 }
 function createUseCase(project, mmItem, selections, existingUseCases, existingPresentations, diagEditor, modelEditor, point){
@@ -99,6 +98,17 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
                 currentPoint.setLocation(currentPoint.getX(), existingPresentations[0].getHeight());
           
     }
+}
+function getFirstSelectedName(selections){
+    var currentSize = 0;
+    var biggestFontObj = null;
+    for(var sIndex in selections){
+        if (currentSize < selections[sIndex].getProperty("font.size")){
+            biggestFontObj = selections[sIndex];
+            currentSize = selections[sIndex].getProperty("font.size");
+        }
+    }
+    return biggestFontObj;
 }
 function printAllPresentations(_presentations){
     for (var index in _presentations){
