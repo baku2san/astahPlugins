@@ -16,13 +16,15 @@ function run() {
     with(new JavaImporter(
             com.change_vision.jude.api.inf.model,
             com.change_vision.jude.api.inf.project,
+            com.change_vision.jude.api.inf.presentation,
             com.change_vision.jude.api.inf.editor)) {
 
-        var diagramViewManager = astah.getViewManager().getDiagramViewManager();
+        var projectAccessor = ProjectAccessorFactory.getProjectAccessor();
+        var diagramViewManager = projectAccessor.getViewManager().getDiagramViewManager();
         var currentDiagram = diagramViewManager.getCurrentDiagram();
         var selectedEntities = diagramViewManager.getSelectedPresentations();
+        
         var firstestMM = getFirstSelectedName(selectedEntities);
-
         // MindMap でのみ動作
         if (!(currentDiagram instanceof IMindMapDiagram)){
             print ("open mindmap and run again.");
@@ -30,6 +32,7 @@ function run() {
         }
         var mmRoot = currentDiagram.getRoot();
         var mmChildren = mmRoot.getChildren();
+
         var newDiagramName = "";
         if ( isMMDiagramName){
             newDiagramName= currentDiagram.getName();
@@ -42,7 +45,6 @@ function run() {
         TransactionManager.beginTransaction();
             
         // MinｄMapと同一名のUseCase図取得
-        var projectAccessor = ProjectAccessorFactory.getProjectAccessor();
         var foundUseCaseDiagram = projectAccessor.findElements(IUseCaseDiagram.class, newDiagramName);
         var iuseCaseDiagram = null;
         if ( foundUseCaseDiagram.length == 0) {
@@ -80,8 +82,8 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
         var str = new String(mmChild);
         if (str.match(/\r?\n/) == null){
             if (hasPresentation(selections, mmChild)){
-                print("selected " + mmChild );
-                
+                print("selected " + mmChild  + mmChild.getModel());
+
                 // mindmap に対応したUsecaseModelを取得or 生成
                 var ucChild = null;
                 if (hasItem(existingUseCases, mmChild)){
@@ -105,6 +107,10 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
         }
         currentPoint.setLocation(currentPoint.getX(), existingPresentations[0].getHeight());
     }
+}
+
+function printType(obj){
+    return print(Object.prototype.toString.apply(obj));
 }
 function getFirstSelectedName(selections){
     var currentSize = 0;
