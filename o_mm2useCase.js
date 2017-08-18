@@ -89,9 +89,13 @@ function createUseCase(project, mmItem, selections, existingUseCases, existingPr
                 }else {
                     ucChild = modelEditor.createUseCase(project, mmChild);
                     existingUseCases.push(mmChild);
+                    // 新規追加時のみ相互Hyperlink生成 
+                    // 現状、MindMapへのLinkが作れない・・吐き出しは元の機能を使って、ここでは表示だけの追加に絞るかな・・
+//                    ucChild.createFileHyperlink(mmChild,mmRoot, null);    
+                    mmChild.createElementHyperlink(ucChild, null);
                 }
-                    // ユースケース図上に表示追加:  抑制する場合にはこれが必要
-                    //            if (hasPresentation(existingPresentations, mmChild)){
+                // ユースケース図上に表示追加:  抑制する場合にはこれが必要
+                //            if (hasPresentation(existingPresentations, mmChild)){
                 var uItem = diagEditor.createNodePresentation(ucChild, currentPoint);
             }else{
                 //print("not selected " + mmChild );
