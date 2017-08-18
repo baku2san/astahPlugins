@@ -28,8 +28,9 @@ function run() {
         
         TransactionManager.beginTransaction();
         for (var index in elements){
-            if (elements[index].getPresentations().length == 0 ){
-                print(elements[index] );
+            if (elements[index].getPresentations().length == 0
+                && (elements[index] instanceof  IUseCase) ){
+                print(elements[index] + " : " );
                 if (true){
                     bEditor.delete(elements[index]);
                 }
