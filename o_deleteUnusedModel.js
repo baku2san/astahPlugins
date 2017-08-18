@@ -20,7 +20,8 @@ function run() {
             com.change_vision.jude.api.inf.project,
             com.change_vision.jude.api.inf.editor)) {
 
-        var currentProject = AstahAPI.getAstahAPI().getProjectAccessor().getProject();
+        var projectAccessor = AstahAPI.getAstahAPI().getProjectAccessor();
+        var currentProject = projectAccessor.getProject();
         var dEditor = astah.getDiagramEditorFactory().getUseCaseDiagramEditor();
         var mEditor = astah.getModelEditorFactory().getUseCaseModelEditor();
         var bEditor = astah.getModelEditorFactory().getBasicModelEditor();
@@ -30,8 +31,29 @@ function run() {
         for (var index in elements){
             if (elements[index].getPresentations().length == 0
                 && (elements[index] instanceof  IUseCase) ){
-                print(elements[index] + " : " );
+
                 if (true){
+                    var originalName =elements[index].getName();
+                    var hLinks = elements[index].getHyperlinks();
+                    for (var hIndex in hLinks){
+                        if (hLinks[hIndex].isModel){
+                            var modelId = hLinks[hIndex].getName();
+                            var linkedModel = projectAccessor.getEntity(modelId);
+                            var linkedHLinks = linkedModel.getHyperlinks();
+                            // Hyperlink先に参照がある場合は、そいつを削除
+                            for (var linkedHIndex in linkedHLinks){
+                                if (linkedHLinks[linkedHIndex].isModel()){
+                                    var linkedModelId = linkedHLinks[linkedHIndex].getName();
+                                    if (projectAccessor.getEntity(linkedModelId) == originalName){
+                                        print("deleted link from ... " + linkedModel);
+                                        linkedModel.deleteHyperlink(linkedHLinks[linkedHIndex]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    print("deleted : " + elements[index]);
                     bEditor.delete(elements[index]);
                 }
             }
@@ -41,8 +63,8 @@ function run() {
     }
 }
         /*            
-//            if (elements[index] == "（メモ）"){
-            print(elements[index] + " : " + elements[index].getPresentations().length
+                print(elements[index] + " : " + elements[index].getHyperlinks().length
+                                                  + " : " + elements[index].getPresentations().length
                                               + " : " + elements[index].getStereotypes().length 
                                               + " : " + elements[index].getClientDependencies().length
                                               + ", " + elements[index].getClientRealizations().length
