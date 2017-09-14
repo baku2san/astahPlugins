@@ -1,0 +1,234 @@
+//This script writes out a list of text in the current mindmap.
+//The format is like a WiKi.
+
+// KM1:　Alt＋return の入力は、LF (0x0a)
+// KM2:    そもそも、Macでは、'\', '¥' は使い分けが必要だった・・・・・・ Option + ¥ , ¥ 　Trapだね
+
+// hasSameElement(String name, Class clazz)  プロジェクト内で同名Objがあるか？　Class省略も可能。これ使えばよかった
+
+var depth = 0;
+var INDENT_STR = '  '; //2 spaces
+var ITEM_MARKER_STR = '* ';
+
+run();
+
+exit;
+function run() {
+    exportClassesInCsv();
+    return;
+    printActor();
+    return;
+}
+function printActor(){
+    
+    with(new JavaImporter(
+            com.change_vision.jude.api.inf.model)) {
+        //classes = astah.findElements(IClass.class);
+        
+        classes = projectAccessor.findElements(IUseCase.class);
+    }
+    for (var index in classes){        // Classes 
+        var clazz = classes[index];
+
+        if (true){
+            var obj2 = clazz.getStereotypes();
+            //var obj2 = obj[index].getNestedClasses();　ClassNestでいい感じ？
+    //        var obj2 = obj[index].getDiagrams();    図の一覧が取れる
+            var classAttributes = clazz.getAttributes ();
+            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
+            for(var index2 in classAttributes){        // attribute in attributes of each class
+                var classAttribute = classAttributes[index2];
+                print("= " + classAttribute.getType().getDefinition());
+                var clazzTypes = classAttribute.getStereotypes();    // StreotypeでActorを見分ける
+                var isActor = false;
+                for (var index3 in clazzTypes){
+                    if (clazzTypes[index3] == "actor"){
+                        isActor = true;             
+                        print("actor");           
+                        break;
+                    }
+                }
+                if (!isActor){   
+                
+//                if (item instanceof com.change_vision.jude.api.inf.model.IAttribute){
+                    var assAttributes = classAttribute.getAssociation().getAttributes();
+                    print("    " + assAttributes.length + " - " + classAttribute.getTypeExpression() + " ... " + classAttribute.getDefinition());    //定義
+                    print( classAttribute.getAssociation().getMemberEnds()[0].getDefinition());
+                    print( classAttribute.getAssociation().getMemberEnds()[0].getAssociation().getDefinition());
+                    print( classAttribute.getAssociation().getMemberEnds()[0].getAssociation().getAttributes()[1].getDefinition());
+                    for ( var in3 in assAttributes){
+                        var assAttribute = assAttributes[in3];
+                        print("        " + assAttribute.getTypeExpression() + " ...  " +  assAttribute.getDefinition());
+                        var clazzTypes4 = assAttribute.getStereotypes();    // StreotypeでActorを見分ける
+                        for (var index4 in clazzTypes4){
+                            print("****" + clazzTypes4[index4]);
+                            if (clazzTypes[index4] == "actor"){
+                                isActor = true;             
+                                print("Actor");           
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                   print("!!===");// IAttribute が全部あるよねって確認用。OK
+                }
+                continue;
+                var cons = item.getConnectors();
+                print(cons.length + " " + item);
+                for (var inde in cons){
+                    var item2 = cons[inde];
+                    print("d " + item2);
+                    
+                }
+//                }
+                var o3 = item.getMemberEnds();
+                for (var index3 in o3){
+                    var item3 = o3[index3];
+                    print("t__ " + item3.getTypeExpression());
+                }
+                //print("d " + o2[index2].getDefinition());
+            }
+        }
+        break;
+    }
+}// getChildren持ってるのはMindMapのみ？っぽいので、TryCatchでうまく行く時ってやり方は無理
+function printDiagram(obj){
+    for (var index in obj){
+        if (obj[index] instanceof com.change_vision.jude.api.inf.model.IDiagram){
+            
+            print (obj[index]  );
+        }
+        try{
+            var containers = obj[index].getDiagrams();
+            //printDiagram(containers)
+        }catch(ex){
+            
+        }
+        try{
+            var containers = obj[index].get();
+            printDiagram(containers)
+        }catch(ex){
+            
+        }
+    }
+}
+function printType(obj){
+    return print(Object.prototype.toString.apply(obj));
+}
+
+function exportClassesInCsv() {
+    with(new JavaImporter(
+            com.change_vision.jude.api.inf.model)) {
+        //classes = astah.findElements(IClass.class);
+        
+        classes = projectAccessor.findElements(IUseCase.class);
+    }
+ 
+    var csvFile = selectCsvFile();
+    if (csvFile == null) {
+        print('Canceled');
+        return;
+    }
+    print('Selected file = ' + csvFile.getAbsolutePath());
+    if (csvFile.exists()) {
+        var msg = "Do you want to overwrite?";
+        var ret = JOptionPane.showConfirmDialog(scriptWindow, msg);
+        if (ret != JOptionPane.YES_OPTION) {
+            print('Canceled');
+            return;
+        }
+    }
+ 
+    with(new JavaImporter(
+            java.io)) {
+        var writer = new BufferedWriter(new FileWriter(csvFile));
+ 
+        for(var i in classes) {
+            var clazz = classes[i];
+
+            if (true){   
+                var attributes = clazz.getAttributes ();// 誘導可能性が決まっているもののみ見れる？
+                for(var i2 in attributes){
+                    var typeExpression = attributes[i2].getTypeExpression();
+                    var rowData = [];
+                    rowData.push(clazz.getName());
+                    rowData.push(typeExpression);        
+                    writeRow(writer, rowData);
+                }
+            }
+        } 
+        writer.close();
+    }
+}
+ 
+function selectCsvFile() {
+    with(new JavaImporter(
+            java.io,
+            javax.swing)) {
+        var chooser = new JFileChooser();
+        var selected = chooser.showSaveDialog(scriptWindow);
+        if (selected == JFileChooser.APPROVE_OPTION) {
+            var file = chooser.getSelectedFile();
+            if (file.getName().toLowerCase().endsWith('.csv')) {
+                return file;
+            } else {
+                return new File(file.getAbsolutePath() + '.csv');
+            }
+        } else {
+            return null;
+        }
+    }
+}
+ 
+function writeRow(writer, rowData) {
+    for (var i in rowData) {
+        writeItem(writer, rowData[i]);
+        if (i < rowData.length - 1) {
+            writer.write(',');
+        }
+    }
+    writer.newLine();
+}
+ 
+function writeItem(writer, data) {
+    writer.write('"');
+    writer.write(escapeDoubleQuotes(data));
+    writer.write('"');
+}
+ function printPresentations(model) {
+    if(model == null) {
+        return
+    }
+    var taggedValues = model.getTaggedValues()
+    for each(var taggedValue in taggedValues) {
+        print(taggedValue.getKey() + ":" + taggedValue.getValue())
+    }
+}
+
+ function printTaggedValueInfo(model) {
+    if(model == null) {
+        return
+    }
+    var taggedValues = model.getTaggedValues()
+    for each(var taggedValue in taggedValues) {
+        print(taggedValue.getKey() + ":" + taggedValue.getValue())
+    }
+}
+function escapeDoubleQuotes(data) {
+    return data.replaceAll("\"", "\"\"");
+}
+
+
+        /*            
+                print(elements[index] + " : " + elements[index].getHyperlinks().length
+                                                  + " : " + elements[index].getPresentations().length
+                                              + " : " + elements[index].getStereotypes().length 
+                                              + " : " + elements[index].getClientDependencies().length
+                                              + ", " + elements[index].getClientRealizations().length
+                                              + ", " + elements[index].getClientUsages().length
+                                              + " , " + elements[index].getConstraints().length  
+                                              + " , " + elements[index].getDiagrams().length 
+                                              + " , " + elements[index].getSupplierDependencies().length 
+                                              + " , " + elements[index].getSupplierRealizations().length
+                                              + " , " + elements[index].getSupplierUsages().length );
+*/
