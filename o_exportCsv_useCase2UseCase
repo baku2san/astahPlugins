@@ -30,66 +30,42 @@ function printActor(){
     for (var index in classes){        // Classes 
         var clazz = classes[index];
 
+            print(clazz.getName());
         if (true){
-            var obj2 = clazz.getStereotypes();
-            //var obj2 = obj[index].getNestedClasses();　ClassNestでいい感じ？
-    //        var obj2 = obj[index].getDiagrams();    図の一覧が取れる
+            // 出現する図の一覧
+            var pNames = "";
+            var presentations = clazz.getPresentations();
+            for (var pIndex in presentations){
+                var presentation = presentations[pIndex];
+                pNames = pNames + presentation.getDiagram().getName() + ",";
+            }
+            
+            // 接続するActorとUseCaseの一覧
+            var aNames = "";
+            var uNames = "";
             var classAttributes = clazz.getAttributes ();
-            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
-            for(var index2 in classAttributes){        // attribute in attributes of each class
-                var classAttribute = classAttributes[index2];
-                print("= " + classAttribute.getType().getDefinition());
-                var clazzTypes = classAttribute.getStereotypes();    // StreotypeでActorを見分ける
+//            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
+            for(var aIndex in classAttributes){        // attribute in attributes of each class
+                var classAttribute = classAttributes[aIndex];
+                var connectedClass = classAttribute.getType();
+                
+                var types = connectedClass.getStereotypes();
                 var isActor = false;
-                for (var index3 in clazzTypes){
-                    if (clazzTypes[index3] == "actor"){
-                        isActor = true;             
-                        print("actor");           
+                for (var tIndex in types){
+                    if (types[tIndex] == "actor"){
+                        isActor = true;         
                         break;
                     }
                 }
-                if (!isActor){   
-                
-//                if (item instanceof com.change_vision.jude.api.inf.model.IAttribute){
-                    var assAttributes = classAttribute.getAssociation().getAttributes();
-                    print("    " + assAttributes.length + " - " + classAttribute.getTypeExpression() + " ... " + classAttribute.getDefinition());    //定義
-                    print( classAttribute.getAssociation().getMemberEnds()[0].getDefinition());
-                    print( classAttribute.getAssociation().getMemberEnds()[0].getAssociation().getDefinition());
-                    print( classAttribute.getAssociation().getMemberEnds()[0].getAssociation().getAttributes()[1].getDefinition());
-                    for ( var in3 in assAttributes){
-                        var assAttribute = assAttributes[in3];
-                        print("        " + assAttribute.getTypeExpression() + " ...  " +  assAttribute.getDefinition());
-                        var clazzTypes4 = assAttribute.getStereotypes();    // StreotypeでActorを見分ける
-                        for (var index4 in clazzTypes4){
-                            print("****" + clazzTypes4[index4]);
-                            if (clazzTypes[index4] == "actor"){
-                                isActor = true;             
-                                print("Actor");           
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                   print("!!===");// IAttribute が全部あるよねって確認用。OK
+                if (isActor){
+                    aNames = aNames + connectedClass.getName() + ",";
+                }else {
+                    uNames = uNames + connectedClass.getName() + ",";
                 }
-                continue;
-                var cons = item.getConnectors();
-                print(cons.length + " " + item);
-                for (var inde in cons){
-                    var item2 = cons[inde];
-                    print("d " + item2);
-                    
-                }
-//                }
-                var o3 = item.getMemberEnds();
-                for (var index3 in o3){
-                    var item3 = o3[index3];
-                    print("t__ " + item3.getTypeExpression());
-                }
-                //print("d " + o2[index2].getDefinition());
             }
+
+            print("   -> "+ pNames + " // " + aNames + " -- " + uNames);
         }
-        break;
     }
 }// getChildren持ってるのはMindMapのみ？っぽいので、TryCatchでうまく行く時ってやり方は無理
 function printDiagram(obj){
@@ -146,15 +122,46 @@ function exportClassesInCsv() {
         for(var i in classes) {
             var clazz = classes[i];
 
-            if (true){   
-                var attributes = clazz.getAttributes ();// 誘導可能性が決まっているもののみ見れる？
-                for(var i2 in attributes){
-                    var typeExpression = attributes[i2].getTypeExpression();
-                    var rowData = [];
-                    rowData.push(clazz.getName());
-                    rowData.push(typeExpression);        
-                    writeRow(writer, rowData);
+            // 出現する図の一覧
+            var pNames = "";
+            var presentations = clazz.getPresentations();
+            for (var pIndex in presentations){
+                var presentation = presentations[pIndex];
+                pNames = pNames + presentation.getDiagram().getName() + ",";
+            }
+            
+            // 接続するActorとUseCaseの一覧
+            var aNames = "";
+            var uNames = "";
+            var classAttributes = clazz.getAttributes ();
+//            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
+            for(var aIndex in classAttributes){        // attribute in attributes of each class
+                var classAttribute = classAttributes[aIndex];
+                var connectedClass = classAttribute.getType();
+                
+                var types = connectedClass.getStereotypes();
+                var isActor = false;
+                for (var tIndex in types){
+                    if (types[tIndex] == "actor"){
+                        isActor = true;         
+                        break;
+                    }
                 }
+                if (isActor){
+                    aNames = aNames + connectedClass.getName() + ",";
+                }else {
+                    uNames = uNames + connectedClass.getName() + ",";
+                }
+            }
+
+            if (true){   
+                var rowData = [];
+                rowData.push(clazz.getName());
+                rowData.push(clazz.getDefinition());
+                rowData.push(aNames);
+                rowData.push(pNames);
+                rowData.push(uNames);        
+                writeRow(writer, rowData);
             }
         } 
         writer.close();
