@@ -118,7 +118,7 @@ function exportClassesInCsv() {
     with(new JavaImporter(
             java.io)) {
         var writer = new BufferedWriter(new FileWriter(csvFile));
- 
+        var delimiter = ",";    //        delimiter = "\r";    ExcelのCell内改行をしたい場合
         for(var i in classes) {
             var clazz = classes[i];
 
@@ -127,7 +127,7 @@ function exportClassesInCsv() {
             var presentations = clazz.getPresentations();
             for (var pIndex in presentations){
                 var presentation = presentations[pIndex];
-                pNames = pNames + presentation.getDiagram().getName() + ",";
+                pNames = pNames + presentation.getDiagram().getName() + delimiter;
             }
             
             // 接続するActorとUseCaseの一覧
@@ -148,11 +148,14 @@ function exportClassesInCsv() {
                     }
                 }
                 if (isActor){
-                    aNames = aNames + connectedClass.getName() + ",";
+                    aNames = aNames + connectedClass.getName() + delimiter;
                 }else {
-                    uNames = uNames + connectedClass.getName() + ",";
+                    uNames = uNames + connectedClass.getName() + delimiter;
                 }
             }
+            aNames = aNames.substr(0, aNames.length - 1);
+            pNames = pNames.substr(0, pNames.length - 1);
+            uNames = uNames.substr(0, uNames.length - 1);
 
             if (true){   
                 var rowData = [];
