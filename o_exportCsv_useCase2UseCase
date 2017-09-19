@@ -156,6 +156,8 @@ function exportClassesInCsv() {
                 }
             }
 
+            // 最長の要素に合わせて、その分の行を出力する。それぞれ別単位なので合わせていいのかという話はあるが、
+            // 別にしたり、排他的出力にすると、余計に見難いと判断
             var maxLength = pNames.length;
             if ( aNames.length > maxLength){
                 maxLength = aNames.length;
