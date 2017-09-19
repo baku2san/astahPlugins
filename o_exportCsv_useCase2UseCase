@@ -123,16 +123,16 @@ function exportClassesInCsv() {
             var clazz = classes[i];
 
             // 出現する図の一覧
-            var pNames = "";
+            var pNames = [];
             var presentations = clazz.getPresentations();
             for (var pIndex in presentations){
                 var presentation = presentations[pIndex];
-                pNames = pNames + presentation.getDiagram().getName() + delimiter;
+                pNames.push( presentation.getDiagram().getName() );
             }
             
             // 接続するActorとUseCaseの一覧
-            var aNames = "";
-            var uNames = "";
+            var aNames = [];
+            var uNames = [];
             var classAttributes = clazz.getAttributes ();
 //            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
             for(var aIndex in classAttributes){        // attribute in attributes of each class
@@ -148,22 +148,38 @@ function exportClassesInCsv() {
                     }
                 }
                 if (isActor){
-                    aNames = aNames + connectedClass.getName() + delimiter;
+                    aNames.push( connectedClass.getName() );
                 }else {
-                    uNames = uNames + connectedClass.getName() + delimiter;
+                    uNames.push( connectedClass.getName() );
                 }
             }
-            aNames = aNames.substr(0, aNames.length - 1);
-            pNames = pNames.substr(0, pNames.length - 1);
-            uNames = uNames.substr(0, uNames.length - 1);
 
-            if (true){   
+            var maxLength = pNames.length;
+            if ( aNames.length > maxLength){
+                maxLength = aNames.length;
+            }  
+            if ( uNames.length > maxLength) {
+                maxLength = uNames.length;
+            }
+            for (var len = 0; len < maxLength; len++){
+                var aName = "";
+                var pName = "";
+                var uName = "";
+                if (aNames.length > len){
+                    aName = aNames[len];
+                }
+                if (pNames.length > len){
+                    pName = pNames[len];
+                }
+                if (uNames.length > len){
+                    uName = uNames[len];
+                }
                 var rowData = [];
                 rowData.push(clazz.getName());
                 rowData.push(clazz.getDefinition());
-                rowData.push(aNames);
-                rowData.push(pNames);
-                rowData.push(uNames);        
+                rowData.push(aName);
+                rowData.push(pName);
+                rowData.push(uName);        
                 writeRow(writer, rowData);
             }
         } 
