@@ -14,7 +14,9 @@ run();
 
 exit;
 function run() {
+    print("問題点）UseCaseとSubSystemが分離できていないので同一名で複数行出力があるので削除必要");
     exportClassesInCsv();
+    
     return;
     printActor();
     return;
