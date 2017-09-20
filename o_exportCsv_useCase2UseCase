@@ -20,7 +20,7 @@ function run() {
     return;
 }
 function printActor(){
-    
+    // 動作検証用テストコード
     with(new JavaImporter(
             com.change_vision.jude.api.inf.model)) {
         //classes = astah.findElements(IClass.class);
@@ -30,7 +30,7 @@ function printActor(){
     for (var index in classes){        // Classes 
         var clazz = classes[index];
 
-            print(clazz.getName());
+    //        print(clazz.getName());
         if (true){
             // 出現する図の一覧
             var pNames = "";
@@ -57,6 +57,11 @@ function printActor(){
                         break;
                     }
                 }
+                if (connectedClass.getName() == "FDC分析ツール"){
+                    if ( connectedClass instanceof com.change_vision.jude.api.inf.model.ISubsystem){
+                        print("isub " + connectedClass.getName());
+                    }
+                }
                 if (isActor){
                     aNames = aNames + connectedClass.getName() + ",";
                 }else {
@@ -64,32 +69,9 @@ function printActor(){
                 }
             }
 
-            print("   -> "+ pNames + " // " + aNames + " -- " + uNames);
+      //      print("   -> "+ pNames + " // " + aNames + " -- " + uNames);
         }
     }
-}// getChildren持ってるのはMindMapのみ？っぽいので、TryCatchでうまく行く時ってやり方は無理
-function printDiagram(obj){
-    for (var index in obj){
-        if (obj[index] instanceof com.change_vision.jude.api.inf.model.IDiagram){
-            
-            print (obj[index]  );
-        }
-        try{
-            var containers = obj[index].getDiagrams();
-            //printDiagram(containers)
-        }catch(ex){
-            
-        }
-        try{
-            var containers = obj[index].get();
-            printDiagram(containers)
-        }catch(ex){
-            
-        }
-    }
-}
-function printType(obj){
-    return print(Object.prototype.toString.apply(obj));
 }
 
 function exportClassesInCsv() {
@@ -258,18 +240,3 @@ function writeItem(writer, data) {
 function escapeDoubleQuotes(data) {
     return data.replaceAll("\"", "\"\"");
 }
-
-
-        /*            
-                print(elements[index] + " : " + elements[index].getHyperlinks().length
-                                                  + " : " + elements[index].getPresentations().length
-                                              + " : " + elements[index].getStereotypes().length 
-                                              + " : " + elements[index].getClientDependencies().length
-                                              + ", " + elements[index].getClientRealizations().length
-                                              + ", " + elements[index].getClientUsages().length
-                                              + " , " + elements[index].getConstraints().length  
-                                              + " , " + elements[index].getDiagrams().length 
-                                              + " , " + elements[index].getSupplierDependencies().length 
-                                              + " , " + elements[index].getSupplierRealizations().length
-                                              + " , " + elements[index].getSupplierUsages().length );
-*/
