@@ -3,7 +3,7 @@
 
 // KM1:　Alt＋return の入力は、LF (0x0a)
 // KM2:    そもそも、Macでは、'\', '¥' は使い分けが必要だった・・・・・・ Option + ¥ , ¥ 　Trapだね
-
+// KM3:    return in cell of Excel : CR(0x0d)
 // hasSameElement(String name, Class clazz)  プロジェクト内で同名Objがあるか？　Class省略も可能。これ使えばよかった
 
 var depth = 0;
@@ -14,9 +14,7 @@ run();
 
 exit;
 function run() {
-    print("問題点）UseCaseとSubSystemが分離できていないので同一名で複数行出力があるので削除必要");
-    exportClassesInCsv();
-    
+    exportClassesInCsv();    
     return;
     printActor();
     return;
@@ -110,8 +108,8 @@ function exportClassesInCsv() {
     print('Selected file = ' + csvFile.getAbsolutePath());
     if (csvFile.exists()) {
         var msg = "Do you want to overwrite?";
-        var ret = JOptionPane.showConfirmDialog(scriptWindow, msg);
-        if (ret != JOptionPane.YES_OPTION) {
+        var ret = javax.swing.JOptionPane.showConfirmDialog(scriptWindow, msg);
+        if (ret != javax.swing.JOptionPane.YES_OPTION) {
             print('Canceled');
             return;
         }
@@ -135,6 +133,7 @@ function exportClassesInCsv() {
             // 接続するActorとUseCaseの一覧
             var aNames = [];
             var uNames = [];
+            var sNames = [];
             var classAttributes = clazz.getAttributes ();
 //            print(" -" + classAttributes.length + "-    " + clazz + " ... " + clazz.getDefinition());
             for(var aIndex in classAttributes){        // attribute in attributes of each class
@@ -152,7 +151,11 @@ function exportClassesInCsv() {
                 if (isActor){
                     aNames.push( connectedClass.getName() );
                 }else {
-                    uNames.push( connectedClass.getName() );
+                    if ( connectedClass instanceof com.change_vision.jude.api.inf.model.ISubsystem){
+                        sNames.push( connectedClass.getName() );
+                    } else {
+                        uNames.push( connectedClass.getName() );
+                    }
                 }
             }
 
@@ -165,10 +168,14 @@ function exportClassesInCsv() {
             if ( uNames.length > maxLength) {
                 maxLength = uNames.length;
             }
+            if ( sNames.length > maxLength) {
+                maxLength = sNames.length;
+            }
             for (var len = 0; len < maxLength; len++){
                 var aName = "";
                 var pName = "";
                 var uName = "";
+                var sName = "";
                 if (aNames.length > len){
                     aName = aNames[len];
                 }
@@ -178,12 +185,16 @@ function exportClassesInCsv() {
                 if (uNames.length > len){
                     uName = uNames[len];
                 }
+                if (sNames.length > len){
+                    sName = sNames[len];
+                }
                 var rowData = [];
                 rowData.push(clazz.getName());
                 rowData.push(clazz.getDefinition());
                 rowData.push(aName);
                 rowData.push(pName);
                 rowData.push(uName);        
+                rowData.push(sName);   
                 writeRow(writer, rowData);
             }
         } 
