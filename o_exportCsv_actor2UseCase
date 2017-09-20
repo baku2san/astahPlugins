@@ -1,14 +1,3 @@
-//This script writes out a list of text in the current mindmap.
-//The format is like a WiKi.
-
-// KM1:　Alt＋return の入力は、LF (0x0a)
-// KM2:    そもそも、Macでは、'\', '¥' は使い分けが必要だった・・・・・・ Option + ¥ , ¥ 　Trapだね
-
-// hasSameElement(String name, Class clazz)  プロジェクト内で同名Objがあるか？　Class省略も可能。これ使えばよかった
-
-var depth = 0;
-var INDENT_STR = '  '; //2 spaces
-var ITEM_MARKER_STR = '* ';
 
 run();
 
@@ -16,84 +5,8 @@ exit;
 function run() {
     exportClassesInCsv();
     return;
-    printActor();
-    return;
 }
-function printActor(){
-    
-    with(new JavaImporter(
-            com.change_vision.jude.api.inf.model)) {
-        //classes = astah.findElements(IClass.class);
-        
-        classes = projectAccessor.findElements(IClass.class);
-    }
-    for (var index in classes){
-        var clazz = classes[index];
-        var clazzTypes = clazz.getStereotypes();    // StreotypeでActorを見分ける
-        var isActor = false;
-        for (var index in clazzTypes){
-            if (clazzTypes[index] == "actor"){
-                isActor = true;
-                
-                break;
-            }
-        }
-        if (isActor){
-            var obj2 = clazz.getStereotypes();
-            //var obj2 = obj[index].getNestedClasses();　ClassNestでいい感じ？
-    //        var obj2 = obj[index].getDiagrams();    図の一覧が取れる
-            var o2 = clazz.getAttributes ();
-            for(var index2 in o2){
-                var item = o2[index2];
-                if (item.getTypeExpression() == "装置トラブルを対応する"){
-                    print(" --    " + clazz);
-                    print("t " + item.getTypeExpression());    // 名称：型名であってそう
-                    if (item instanceof com.change_vision.jude.api.inf.model.IAttribute){
-                        print("IAS" + item.getAssociation().getAttributes()[0].getTypeExpression());
-                        print("IAS" + item.getAssociation().getAttributes()[1].getTypeExpression());
-                    }
-                    var cons = item.getConnectors();
-                    print(cons.length + " " + item);
-                    for (var inde in cons){
-                        var item2 = cons[inde];
-                        print("d " + item2);
-                        
-                    }
-                }
-                continue;
-                var o3 = item.getMemberEnds();
-                for (var index3 in o3){
-                    var item3 = o3[index3];
-                    print("t__ " + item3.getTypeExpression());
-                }
-                //print("d " + o2[index2].getDefinition());
-            }
-        }
-    }
-}// getChildren持ってるのはMindMapのみ？っぽいので、TryCatchでうまく行く時ってやり方は無理
-function printDiagram(obj){
-    for (var index in obj){
-        if (obj[index] instanceof com.change_vision.jude.api.inf.model.IDiagram){
-            
-            print (obj[index]  );
-        }
-        try{
-            var containers = obj[index].getDiagrams();
-            //printDiagram(containers)
-        }catch(ex){
-            
-        }
-        try{
-            var containers = obj[index].get();
-            printDiagram(containers)
-        }catch(ex){
-            
-        }
-    }
-}
-function printType(obj){
-    return print(Object.prototype.toString.apply(obj));
-}
+
 
 function exportClassesInCsv() {
     with(new JavaImporter(
@@ -111,8 +24,8 @@ function exportClassesInCsv() {
     print('Selected file = ' + csvFile.getAbsolutePath());
     if (csvFile.exists()) {
         var msg = "Do you want to overwrite?";
-        var ret = JOptionPane.showConfirmDialog(scriptWindow, msg);
-        if (ret != JOptionPane.YES_OPTION) {
+        var ret = javax.swing.JOptionPane.showConfirmDialog(scriptWindow, msg);
+        if (ret != javax.swing.JOptionPane.YES_OPTION) {
             print('Canceled');
             return;
         }
@@ -189,40 +102,6 @@ function writeItem(writer, data) {
     writer.write(escapeDoubleQuotes(data));
     writer.write('"');
 }
- function printPresentations(model) {
-    if(model == null) {
-        return
-    }
-    var taggedValues = model.getTaggedValues()
-    for each(var taggedValue in taggedValues) {
-        print(taggedValue.getKey() + ":" + taggedValue.getValue())
-    }
-}
-
- function printTaggedValueInfo(model) {
-    if(model == null) {
-        return
-    }
-    var taggedValues = model.getTaggedValues()
-    for each(var taggedValue in taggedValues) {
-        print(taggedValue.getKey() + ":" + taggedValue.getValue())
-    }
-}
 function escapeDoubleQuotes(data) {
     return data.replaceAll("\"", "\"\"");
 }
-
-
-        /*            
-                print(elements[index] + " : " + elements[index].getHyperlinks().length
-                                                  + " : " + elements[index].getPresentations().length
-                                              + " : " + elements[index].getStereotypes().length 
-                                              + " : " + elements[index].getClientDependencies().length
-                                              + ", " + elements[index].getClientRealizations().length
-                                              + ", " + elements[index].getClientUsages().length
-                                              + " , " + elements[index].getConstraints().length  
-                                              + " , " + elements[index].getDiagrams().length 
-                                              + " , " + elements[index].getSupplierDependencies().length 
-                                              + " , " + elements[index].getSupplierRealizations().length
-                                              + " , " + elements[index].getSupplierUsages().length );
-*/
