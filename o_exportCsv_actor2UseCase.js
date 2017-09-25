@@ -46,28 +46,56 @@ function exportClassesInCsv() {
                     break;
                 }
             }
-            if (isActor){   
-                var attributes = clazz.getAttributes ();// 誘導可能性が決まっているもののみ見れる？
-                if (attributes.length > 0){
-                    for(var i2 in attributes){
-                        var typeExpression = attributes[i2].getTypeExpression();
-                        var rowData = [];
-                        rowData.push(clazz.getName());
-                        rowData.push(typeExpression);        
-                        writeRow(writer, rowData);
-                    }
-                } else { // ユースケース持っていない場合にアクターのみ出力する
-                    var rowData = [];
-                    rowData.push(clazz.getName());
-                    rowData.push("");        
-                    writeRow(writer, rowData);
+            if (isActor){                   
+                if (countDepth(clazz,0) == 0){ // 継承関係のTopから、順を追って表示
+                    outputSpecification(writer, clazz, 0);
                 }
             }
         } 
         writer.close();
     }
 }
- 
+function outputLine(writer, clazz, depth){
+    var actors = ["","","",""]; // 現状Actorの継承は　親＞子＞孫＞ひ孫　までなので。
+    actors[depth] = clazz.getName();
+    var attributes = clazz.getAttributes ();// 誘導可能性が決まっているもののみ見れる？
+
+    if (attributes.length > 0){
+        for(var i2 in attributes){
+            var typeExpression = attributes[i2].getTypeExpression();
+            var rowData = [];
+            for ( var aIndex in actors){    // 階層化アクター出力
+                rowData.push(actors[aIndex]);                
+            }
+            rowData.push(typeExpression);        
+            writeRow(writer, rowData);
+        }
+    } else { // ユースケース持っていない場合にアクターのみ出力する
+        var rowData = [];
+        for ( var aIndex in actors){
+            rowData.push(actors[aIndex]);          
+        }
+        rowData.push("");        
+        writeRow(writer, rowData);
+    }
+}
+function outputSpecification(writer, clazz, depth){
+    var specializations = clazz.getSpecializations();
+    if( countDepth(clazz, 0) == 0){
+        outputLine( writer, clazz, depth);
+    }
+    if (specializations.length > 0){
+        for( var sIndex in specializations){
+            var spec = specializations[sIndex];
+            var subClass = spec.getSubType();
+            var nextDepth = depth + 1;
+            outputLine( writer, subClass, depth + 1);
+            outputSpecification(writer, subClass, nextDepth);
+        }
+    } else {
+        return;
+    }    
+}
 function selectCsvFile() {
     with(new JavaImporter(
             java.io,
