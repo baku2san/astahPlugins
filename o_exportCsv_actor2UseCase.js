@@ -5,8 +5,60 @@ exit;
 function run() {
     exportClassesInCsv();
     return;
+    displayActor();
+    return;
 }
+function displayActor(){
+    with(new JavaImporter(
+            com.change_vision.jude.api.inf.model)) {
+        //classes = astah.findElements(IClass.class);
+        
+        classes = projectAccessor.findElements(IClass.class);
+    }
+    var hoge = ["","","","",""];
+    hoge[3] = "hoge";
+    print(hoge);
+    for(var i in classes) {
+        var clazz = classes[i];
+        var clazzTypes = clazz.getStereotypes();    // StreotypeでActorを見分ける
+        var isActor = false;
+        for (var index in clazzTypes){
+            if (clazzTypes[index] == "actor"){
+                isActor = true;                
+                break;
+            }
+        }
+        if (isActor){   
+            if (countDepth(clazz,0) == 0){
+//                print(clazz);
+                printSpecification(clazz, 0);
+            }
 
+            var attributes = clazz.getAttributes ();// 誘導可能性が決まっているもののみ見れる？
+            if (attributes.length > 0){
+            } else { // ユースケース持っていない場合にアクターのみ出力する
+                
+            }
+        }
+    }
+}
+function printSpecification(clazz, depth){
+    var specializations = clazz.getSpecializations();
+    if( countDepth(clazz, 0) == 0){
+        print( clazz);
+    }
+    if (specializations.length > 0){
+        for( var sIndex in specializations){
+            var spec = specializations[sIndex];
+            var subClass = spec.getSubType();
+            var nextDepth = depth + 1;
+            print(Array(nextDepth + 1).join('| ')+ subClass);
+            printSpecification(subClass, nextDepth);
+        }
+    } else {
+        return;
+    }    
+}
 function countDepth(clazz, depth){
     var generalizations = clazz.getGeneralizations();
     if (generalizations.length > 0){
