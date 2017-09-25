@@ -7,6 +7,14 @@ function run() {
     return;
 }
 
+function countDepth(clazz, depth){
+    var generalizations = clazz.getGeneralizations();
+    if (generalizations.length > 0){
+        return countDepth(generalizations[0].getSuperType(), depth + 1);
+    } else {
+        return depth;
+    }
+}
 
 function exportClassesInCsv() {
     with(new JavaImporter(
